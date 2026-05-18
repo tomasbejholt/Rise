@@ -758,6 +758,13 @@ footer code {
   margin: 0;
 }
 
+.station-flex-cards__hint {
+  margin: 0 0 0.4rem;
+  text-align: center;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.62);
+}
+
 /* Expanding flex cards – inspirerad av CodePen z- / OBPJKK */
 .station-flex-cards {
   display: flex;
@@ -775,7 +782,7 @@ footer code {
   position: relative;
   overflow: hidden;
   flex: 1 1 0;
-  min-width: 3.25rem;
+  min-width: 4.25rem;
   margin: 6px;
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.12);
@@ -798,11 +805,54 @@ footer code {
   border-color: rgba(255, 255, 255, 0.22);
   background-size: auto 100%;
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  outline: 2px solid var(--option-accent, #5d9cec);
+  outline-offset: 2px;
 }
 
-.station-flex-cards__option:not(.is-active) .station-flex-cards__info > * {
-  opacity: 0;
-  transform: translateX(12px);
+.station-flex-cards__chip {
+  display: none;
+}
+
+.station-flex-cards__option:not(.is-active) .station-flex-cards__chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  gap: 0.35rem;
+  padding: 0.45rem 0.3rem 0.55rem;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.82) 0%,
+    rgba(0, 0, 0, 0.4) 50%,
+    transparent 78%
+  );
+}
+
+.station-flex-cards__option:not(.is-active) .station-flex-cards__label {
+  display: none;
+}
+
+.station-flex-cards__chip-name {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  line-height: 1.15;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.75);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.station-flex-cards__option:not(.is-active) .station-flex-cards__icon {
+  width: 30px;
+  height: 30px;
+  font-size: 0.85rem;
 }
 
 .station-flex-cards__shadow {

@@ -390,10 +390,14 @@ function buildStationFlexCards() {
       const active = id === selectedStation;
       return `<button type="button" class="station-flex-cards__option${
         active ? " is-active" : ""
-      }" data-station="${id}" role="option" aria-selected="${active}" style="--option-bg: url('${flex.bg}'); --option-accent: ${
+      }" data-station="${id}" role="option" aria-selected="${active}" aria-label="${loc.name}" title="${loc.name}" style="--option-bg: url('${flex.bg}'); --option-accent: ${
         flex.accent
       }">
       <span class="station-flex-cards__shadow" aria-hidden="true"></span>
+      <span class="station-flex-cards__chip" aria-hidden="true">
+        <span class="station-flex-cards__icon">${flex.icon}</span>
+        <span class="station-flex-cards__chip-name">${loc.name}</span>
+      </span>
       <span class="station-flex-cards__label">
         <span class="station-flex-cards__icon" aria-hidden="true">${flex.icon}</span>
         <span class="station-flex-cards__info">
