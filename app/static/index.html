@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rise – Väderanalys Vinga A</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+  <header>
+    <p class="eyebrow">SMHI öppna data</p>
+    <h1>Rise</h1>
+    <p class="subtitle">Temperaturanalys & prognos – <span id="station">Vinga A</span></p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>Historik (årsmedel)</h2>
+      <canvas id="chart" height="120"></canvas>
+      <p class="note">Data med glapp 1998–2007 p.g.a. stationens driftstopp.</p>
+    </section>
+
+    <section class="card predict-form">
+      <h2>Prognos för datum</h2>
+      <form id="predict-form">
+        <label for="date-input">Välj datum</label>
+        <div class="row">
+          <input type="date" id="date-input" required />
+          <button type="submit">Beräkna</button>
+        </div>
+      </form>
+      <p id="predict-error" class="error" hidden></p>
+    </section>
+
+    <section class="grid">
+      <div class="card stat">
+        <h3>Prognos</h3>
+        <p class="value" id="predict-value">–</p>
+        <p class="meta" id="predict-meta"></p>
+      </div>
+      <div class="card stat">
+        <h3>Trend (årsmedel)</h3>
+        <p class="value" id="trend-value">–</p>
+        <p class="meta" id="trend-meta"></p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Väderdata © SMHI. <code>/predict</code> från gruppens API – placeholder tills <code>model.pkl</code> pushas.</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
