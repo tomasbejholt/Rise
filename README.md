@@ -102,10 +102,10 @@ GET /predict?date=2028-06-14&station=stockholm
 
 | Name | Role |
 |------|------|
-| Hereng Issa | Python / AI developer |
-| Philip Thorell | Python / AI developer |
-| Tomas Bejholt | Python / AI developer |
-| Leo Lindqvist | MLOps |
+| [Hereng Issa](https://github.com/herengissa) | Python / AI developer |
+| [Philip Thorell](https://github.com/philipthorell) | Python / AI developer |
+| [Tomas Bejholt](https://github.com/tomasbejholt) | Python / AI developer |
+| [Leo Lindqvist](https://github.com/LeoLindqvist123) | MLOps |
 
 ## Data & licenses
 
