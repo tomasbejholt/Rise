@@ -1,8 +1,8 @@
 # Tempprognos – Temperature Future Predictor
 
-![App preview](previews/image1.png)
+![App preview](previews/fullpage.png)
 
-A machine learning web application that predicts future temperatures for Swedish weather stations using historical SMHI data. Built at the RISE Hackathon by team GVUX.
+A machine learning web application that predicts future temperatures for Swedish weather stations using historical SMHI data. Built at the RISE Hackathon by us.
 
 ## What it does
 
@@ -60,18 +60,15 @@ python prepare_data.py
 
 ## Run locally
 
-```bash
-uvicorn main:app --reload --port 7860
-```
-
-Open **http://localhost:7860**
-
-### Docker
+Start the FastAPI backend
 
 ```bash
-docker build -t tempprognos .
-docker run -p 7860:7860 tempprognos
+uvicorn main:app --host 0.0.0.0 --port 8000
 ```
+
+The server runs on **http://localhost:8000** by default.
+
+Then open the frontend by opening `app/static/index.html` directly in your browser (e.g. `File > Open File` or `open app/static/index.html`). The HTML/JS in `app/static/` is a standalone frontend and does not need a separate web server — just open the file.
 
 ## API
 
