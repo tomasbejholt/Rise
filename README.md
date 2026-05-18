@@ -1,87 +1,93 @@
-# Tempprognos – Statistisk analys & prognos av väderdata
+# Tempprognos – Temperature Future Predictor
 
-Projekt för att analysera historisk väderdata och bygga underlag för temperaturprognoser. Data kommer från **SMHI:s öppna data** för stationen **Vinga A** (stationsnummer 71380) vid Göteborgs kust.
+![App preview](previews/image1.png)
 
-## Syfte
+A machine learning web application that predicts future temperatures for Swedish weather stations using historical SMHI data. Built at the RISE Hackathon by team GVUX.
 
-- Samla in och rensa daglig lufttemperatur (min, max, medel) över många år
-- Förstå hur vädret förändrats över tid
-- Exponera prognos via API och webbgränssnitt
+## What it does
 
-## Datakälla
+- Predicts temperature for any future date at three stations: **Vinga A**, **Stockholm**, and **Malmö**
+- Returns a point estimate with confidence bounds (low/mid/high)
+- Shows historical annual mean temperatures and long-term trends
+- Compares two dates side by side in the UI
+- Interactive station map with per-station info
 
-| Fil | Ungefärlig period |
-|-----|-------------------|
-| `smhi-opendata_19_71380_199604_200603.csv` | 1996-04 → 1997-11 |
-| `smhi-opendata_19_71380_200603_201602.csv` | 2007-06 → 2016-03 |
-| `smhi-opendata_19_71380_201602_202601.csv` | 2016-02 → 2026-01 |
+## How it works
 
-> **Obs:** Stationen hade driftstopp cirka **1998–2007** (glapp i tidsserien).
+Three XGBoost models (low, mid, high quantile) are trained on historical SMHI daily temperature data (`data_combined.csv`). Features: city, day of year, month, year. If the model file is missing, the app falls back to seasonal averages from the raw CSV.
 
-## Projektstruktur
+## Project structure
 
 ```
-Rise/
-├── prepare_data.py          # SMHI → data_clean.csv
-├── data_clean.csv
-├── main.py                  # FastAPI: /predict, /health, webb-UI
-├── model/                   # predict_temperature() + model.pkl (senare)
-├── api/data_service.py      # Historik & trend för diagram
-├── app/static/              # Frontend (HTML, CSS, JS)
-├── Dockerfile               # Hugging Face Docker Space
-├── requirements.txt
-└── README.md
+RISE-Hackathon/
+├── main.py                  # FastAPI app – /predict, /api/historical, /api/trends
+├── model/predict.py         # ML inference (XGBoost pkl) + seasonal fallback
+├── api/data_service.py      # Station registry, annual means, trend computation
+├── app/static/              # Frontend (HTML, CSS, JS, Leaflet map, Chart.js)
+├── data/                    # Raw SMHI CSVs + cleaned CSVs per station
+├── models/temperature_models.pkl  # Trained XGBoost models
+├── forecaster.ipynb         # Model training notebook
+├── prepare_data.py          # Raw SMHI CSV → data_clean.csv
+├── Dockerfile               # Hugging Face Docker Space (port 7860)
+└── requirements.txt
 ```
 
-## Krav
+## Stations
 
-- Python 3.10+
-- Se `requirements.txt` (inkl. `xgboost` för ML-prognos på Vinga A, Stockholm och Malmö)
-- **macOS:** `brew install libomp` om XGBoost inte startar
+| Key | Station | Source |
+|-----|---------|--------|
+| `vinga` | Vinga A (nr 71380) | SMHI – coastal, Gothenburg archipelago |
+| `stockholm` | Stockholm | SMHI |
+| `malmo` | Malmö | SMHI |
+
+> Vinga A had a data gap roughly **1998–2007** due to station downtime.
+
+## Setup
+
+**Requirements:** Python 3.10+, and on macOS `brew install libomp` if XGBoost fails to load.
 
 ```bash
-python3 -m venv .venv
+python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Data
+Prepare cleaned data (only needed if regenerating from raw CSVs):
 
 ```bash
 python prepare_data.py
 ```
 
-## Köra lokalt
+## Run locally
 
 ```bash
 uvicorn main:app --reload --port 7860
 ```
 
-Öppna **http://localhost:7860**
+Open **http://localhost:7860**
 
 ### Docker
 
 ```bash
-docker build -t rise .
-docker run -p 7860:7860 rise
+docker build -t tempprognos .
+docker run -p 7860:7860 tempprognos
 ```
-
-Hugging Face: **Docker Space**, port **7860**.
 
 ## API
 
-| Endpoint | Beskrivning |
+| Endpoint | Description |
 |----------|-------------|
-| `GET /` | Webb-UI |
-| `GET /health` | Status |
-| `GET /predict?date=YYYY-MM-DD` | Temperaturprognos (gruppens endpoint) |
-| `GET /api/historical` | Årsmedel för diagram |
-| `GET /api/trends` | Linjär trend (diagram) |
+| `GET /` | Web UI |
+| `GET /health` | Status + available stations |
+| `GET /api/stations` | List stations |
+| `GET /predict?date=YYYY-MM-DD&station=vinga` | Temperature forecast |
+| `GET /api/historical?station=vinga` | Annual mean temperatures |
+| `GET /api/trends?station=vinga` | Linear trend data |
 
-Exempel:
+Example request and response:
 
 ```http
-GET /predict?date=2028-06-14
+GET /predict?date=2028-06-14&station=stockholm
 ```
 
 ```json
@@ -89,22 +95,22 @@ GET /predict?date=2028-06-14
   "date": "2028-06-14",
   "predicted_temp": 17.3,
   "lower_bound": 14.8,
-  "upper_bound": 19.8
+  "upper_bound": 19.8,
+  "station_id": "stockholm",
+  "model": "ml"
 }
 ```
 
-**Modell:** Lägg tränad modell som `model/model.pkl` – då används den automatiskt. Annars placeholder baserad på `data_clean.csv`.
+## Team
 
-## Grupp
-
-| Roll | Mapp |
+| Name | Role |
 |------|------|
-| Data | `prepare_data.py` |
-| Modell | `model/` |
-| API | `main.py` |
-| Design | `app/static/` |
-| Deploy | `Dockerfile` |
+| Hereng Issa | Python / AI developer |
+| Philip Thorell | Python / AI developer |
+| Tomas Bejholt | Python / AI developer |
+| Leo Lindqvist | MLOps |
 
-## Licens & data
+## Data & licenses
 
-Väderdata © [SMHI](https://www.smhi.se/). Ange SMHI som källa i presentation och rapport.
+Weather data © [SMHI](https://www.smhi.se/) – cite SMHI as the source in any presentation or report.  
+Map: [Leaflet](https://leafletjs.com/) + OpenStreetMap contributors.
