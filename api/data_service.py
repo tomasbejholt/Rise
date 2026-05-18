@@ -7,7 +7,7 @@ import pandas as pd
 from scipy import stats
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA_FILE = ROOT / "data_clean.csv"
+DATA_FILE = ROOT / "data" / "data_clean.csv"
 STATION = "Vinga A"
 
 
