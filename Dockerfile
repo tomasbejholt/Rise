@@ -9,7 +9,7 @@ COPY main.py .
 COPY api/ api/
 COPY model/ model/
 COPY app/static/ app/static/
-COPY data_clean.csv .
+COPY data/data_clean.csv .
 
 EXPOSE 7860
 
