@@ -30,6 +30,9 @@ Thumbs.db
 *.suo
 *.user
 
+# Data files
+smhi-opendata_*.csv
+
 # Python
 __pycache__/
 *.py[cod]
