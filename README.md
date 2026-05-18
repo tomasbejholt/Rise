@@ -1,4 +1,4 @@
-# Rise – Statistisk analys & prognos av väderdata
+# Tempprognos – Statistisk analys & prognos av väderdata
 
 Projekt för att analysera historisk väderdata och bygga underlag för temperaturprognoser. Data kommer från **SMHI:s öppna data** för stationen **Vinga A** (stationsnummer 71380) vid Göteborgs kust.
 
@@ -36,7 +36,8 @@ Rise/
 ## Krav
 
 - Python 3.10+
-- Se `requirements.txt`
+- Se `requirements.txt` (inkl. `xgboost` för ML-prognos på Vinga A, Stockholm och Malmö)
+- **macOS:** `brew install libomp` om XGBoost inte startar
 
 ```bash
 python3 -m venv .venv

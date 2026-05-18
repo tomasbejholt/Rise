@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parent
 STATIC_DIR = ROOT / "app" / "static"
 
 app = FastAPI(
-    title="Rise – Väderprognos",
+    title="Tempprognos – Väderprognos",
     description="SMHI-data för Vinga A, Stockholm och Malmö.",
 )
 

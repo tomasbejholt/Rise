@@ -3,15 +3,21 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Rise – Väderanalys</title>
+  <title>Tempprognos – Väderanalys</title>
   <link rel="stylesheet" href="/static/style.css" />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body data-bg="lighthouse">
   <!-- Profilkort: Uiverse.io by andrew-demchenk0 – byt namn/länkar under team-card -->
   <section class="team-section" aria-labelledby="team-heading">
     <div class="team-section__inner">
-      <p class="team-section__eyebrow">GVUX · Rise</p>
+      <p class="team-section__eyebrow">GVUX · Tempprognos</p>
       <h2 id="team-heading" class="team-section__title">Projektgruppen</h2>
       <div class="team-grid">
         <article class="team-card" style="--team-accent: #5b9fff">
@@ -79,8 +85,8 @@
   <header class="hero hero--compact">
     <div class="hero-content">
       <p class="eyebrow">SMHI öppna data</p>
-      <h1>Rise</h1>
-      <p class="subtitle">Temperaturanalys & prognos – <span id="station">Vinga A</span></p>
+      <h1>Tempprognos</h1>
+      <p class="subtitle">Förutsäg temperatur från SMHI – <span id="station">Vinga A</span></p>
 
       <div class="hero-moods" role="group" aria-label="Välj bakgrund">
         <button type="button" class="hero-mood is-active" data-bg="lighthouse" aria-pressed="true">
@@ -100,27 +106,29 @@
   </header>
 
   <main>
-    <section class="weather-widgets-stage glass-panel" aria-label="Prognos och jämförelse">
+    <section class="weather-widgets-stage glass-panel glass-panel--forecast" aria-label="Prognos och jämförelse">
       <form id="predict-form" class="weather-widgets-stage__toolbar">
-        <div>
+        <div class="weather-widgets-stage__field weather-widgets-stage__field--sr">
           <label for="station-select">Station</label>
-          <select id="station-select" required>
+          <select id="station-select" required aria-hidden="true" tabindex="-1">
             <option value="vinga">Vinga A</option>
             <option value="stockholm">Stockholm</option>
             <option value="malmo">Malmö</option>
           </select>
         </div>
-        <div>
+        <div class="weather-widgets-stage__field">
           <label for="date-input">Prognosdatum</label>
           <input type="date" id="date-input" required />
         </div>
-        <div>
-          <label for="compare-date-input">Jämförelsedatum</label>
+        <div class="weather-widgets-stage__field">
+          <label for="compare-date-input">Jämförelse</label>
           <input type="date" id="compare-date-input" required />
         </div>
-        <button type="submit">Uppdatera</button>
+        <button type="submit" class="weather-widgets-stage__submit">Uppdatera</button>
         <p id="predict-error" class="weather-widgets-stage__error" hidden></p>
       </form>
+
+      <div id="station-flex-cards" class="station-flex-cards" role="listbox" aria-label="Välj station"></div>
 
       <svg display="none" aria-hidden="true">
         <symbol id="wind" viewBox="0 0 16 16">
@@ -173,107 +181,55 @@
         </symbol>
       </svg>
 
-      <div class="weather-widgets-main">
-        <details id="widget-primary" class="widget" open>
-          <summary class="widget__btn">
-            <span class="widget__top">
-              <span data-stat="city">Vinga A</span>
-              <small class="widget__weather">
-                <span data-stat="kind">–</span>
-                <span class="widget__bull">&bull;</span>
-                <time data-stat="time">–</time>
-              </small>
-            </span>
-            <div class="widget__temp">
-              <span data-stat="temperature">–</span><sup>&deg;<span data-stat="temperature_scale">C</span></sup>
+      <div class="forecast-cards">
+        <article class="forecast-card" id="widget-primary">
+          <div class="data-card forecast-card__inner">
+            <header class="forecast-card__head">
+              <span class="forecast-card__tag">Prognos</span>
+              <span class="forecast-card__city" data-stat="city">–</span>
+              <time class="forecast-card__time" data-stat="time">–</time>
+            </header>
+            <div class="forecast-card__body">
+              <p class="forecast-card__temp">
+                <span data-stat="temperature">–</span><sup>&deg;<span data-stat="temperature_scale">C</span></sup>
+              </p>
+              <svg class="forecast-card__symbol" width="36" height="36" aria-hidden="true">
+                <use href="#cloudy" data-symbol />
+              </svg>
             </div>
-          </summary>
-          <div class="widget__details">
-            <svg class="widget__weather-symbol" width="48" height="48" aria-hidden="true">
-              <use href="#cloudy" data-symbol />
-            </svg>
-            <span class="widget__detail">
-              <small class="widget__detail-name">Intervall</small><br />
-              <span class="widget__detail-value">
-                <svg class="widget__detail-icon" width="16" height="16" aria-hidden="true"><use href="#visibility" /></svg>
-                <span data-stat="interval">–</span>
-              </span>
-            </span>
-            <span class="widget__detail">
-              <small class="widget__detail-name">Trend</small><br />
-              <span class="widget__detail-value">
-                <svg class="widget__detail-icon" width="16" height="16" aria-hidden="true"><use href="#wind" /></svg>
-                <span data-stat="trend">–</span>
-              </span>
-            </span>
-            <span class="widget__detail">
-              <small class="widget__detail-name">Min prognos</small><br />
-              <span class="widget__detail-value">
-                <svg class="widget__detail-icon" width="16" height="16" aria-hidden="true"><use href="#humidity" /></svg>
-                <span data-stat="min_temp">–</span>
-              </span>
-            </span>
-            <span class="widget__detail">
-              <small class="widget__detail-name">Max prognos</small><br />
-              <span class="widget__detail-value">
-                <svg class="widget__detail-icon" width="16" height="16" aria-hidden="true"><use href="#air-quality" /></svg>
-                <span data-stat="max_temp">–</span>
-              </span>
-            </span>
+            <ul class="forecast-card__stats">
+              <li><span class="forecast-card__stat-label">Intervall</span><span class="forecast-card__stat-value" data-stat="interval">–</span></li>
+              <li><span class="forecast-card__stat-label">Trend</span><span class="forecast-card__stat-value" data-stat="trend">–</span></li>
+              <li><span class="forecast-card__stat-label">Min</span><span class="forecast-card__stat-value" data-stat="min_temp">–</span></li>
+              <li><span class="forecast-card__stat-label">Max</span><span class="forecast-card__stat-value" data-stat="max_temp">–</span></li>
+            </ul>
           </div>
-        </details>
-        <details id="widget-compare" class="widget" open>
-          <summary class="widget__btn">
-            <span class="widget__top">
-              <span data-stat="city">Vinga A · jämförelse</span>
-              <small class="widget__weather">
-                <span data-stat="kind">–</span>
-                <span class="widget__bull">&bull;</span>
-                <time data-stat="time">–</time>
-              </small>
-            </span>
-            <div class="widget__temp">
-              <span data-stat="temperature">–</span><sup>&deg;<span data-stat="temperature_scale">C</span></sup>
+        </article>
+        <article class="forecast-card" id="widget-compare">
+          <div class="data-card forecast-card__inner">
+            <header class="forecast-card__head">
+              <span class="forecast-card__tag">Jämförelse</span>
+              <span class="forecast-card__city" data-stat="city">–</span>
+              <time class="forecast-card__time" data-stat="time">–</time>
+            </header>
+            <div class="forecast-card__body">
+              <p class="forecast-card__temp">
+                <span data-stat="temperature">–</span><sup>&deg;<span data-stat="temperature_scale">C</span></sup>
+              </p>
+              <svg class="forecast-card__symbol" width="36" height="36" aria-hidden="true">
+                <use href="#cloudy" data-symbol />
+              </svg>
             </div>
-          </summary>
-          <div class="widget__details">
-            <svg class="widget__weather-symbol" width="48" height="48" aria-hidden="true">
-              <use href="#cloudy" data-symbol />
-            </svg>
-            <span class="widget__detail">
-              <small class="widget__detail-name">Intervall</small><br />
-              <span class="widget__detail-value">
-                <svg class="widget__detail-icon" width="16" height="16" aria-hidden="true"><use href="#visibility" /></svg>
-                <span data-stat="interval">–</span>
-              </span>
-            </span>
-            <span class="widget__detail">
-              <small class="widget__detail-name">Skillnad</small><br />
-              <span class="widget__detail-value">
-                <svg class="widget__detail-icon" width="16" height="16" aria-hidden="true"><use href="#wind" /></svg>
-                <span data-stat="trend">–</span>
-              </span>
-            </span>
-            <span class="widget__detail">
-              <small class="widget__detail-name">Min prognos</small><br />
-              <span class="widget__detail-value">
-                <svg class="widget__detail-icon" width="16" height="16" aria-hidden="true"><use href="#humidity" /></svg>
-                <span data-stat="min_temp">–</span>
-              </span>
-            </span>
-            <span class="widget__detail">
-              <small class="widget__detail-name">Max prognos</small><br />
-              <span class="widget__detail-value">
-                <svg class="widget__detail-icon" width="16" height="16" aria-hidden="true"><use href="#air-quality" /></svg>
-                <span data-stat="max_temp">–</span>
-              </span>
-            </span>
+            <ul class="forecast-card__stats">
+              <li><span class="forecast-card__stat-label">Intervall</span><span class="forecast-card__stat-value" data-stat="interval">–</span></li>
+              <li><span class="forecast-card__stat-label">Skillnad</span><span class="forecast-card__stat-value" data-stat="trend">–</span></li>
+              <li><span class="forecast-card__stat-label">Min</span><span class="forecast-card__stat-value" data-stat="min_temp">–</span></li>
+              <li><span class="forecast-card__stat-label">Max</span><span class="forecast-card__stat-value" data-stat="max_temp">–</span></li>
+            </ul>
           </div>
-        </details>
-        <p class="note widget-hint">
-          Två datum: prognos och jämförelse (standard −10 år). Trend i vänster widget = °C/år; höger = skillnad mot prognos.
-        </p>
+        </article>
       </div>
+      <p class="forecast-cards__hint">Prognos vs jämförelse (−10 år). Vänster: trend °C/år · höger: skillnad mot prognos.</p>
     </section>
 
     <section class="tabs-panel glass-panel" aria-label="Mer information">
@@ -282,33 +238,43 @@
           Historik
         </button>
         <button type="button" class="tabs__btn" role="tab" id="tab-gallery" aria-selected="false" aria-controls="panel-gallery" data-tab="gallery">
-          Station & bilder
+          Station
         </button>
       </div>
 
-      <div id="panel-historik" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-historik">
-        <h2>Historik (årsmedel)</h2>
-        <canvas id="chart" height="140"></canvas>
-        <p id="chart-note" class="note">Data med glapp 1998–2007 p.g.a. stationens driftstopp.</p>
+      <div id="panel-historik" class="tab-panel chart-panel is-active" role="tabpanel" aria-labelledby="tab-historik">
+        <article class="data-card">
+          <header class="data-card__header">
+            <div>
+              <h2 id="chart-title" class="data-card__title">Historik</h2>
+              <p id="chart-subtitle" class="data-card__subtitle">Årsmedel temperatur · SMHI</p>
+            </div>
+            <div id="chart-badges" class="data-card__badges" aria-live="polite"></div>
+          </header>
+          <div class="data-card__chart">
+            <canvas id="chart" aria-label="Diagram över årsmedeltemperatur"></canvas>
+          </div>
+          <p id="chart-note" class="data-card__note">Data med glapp 1998–2007 p.g.a. stationens driftstopp.</p>
+        </article>
       </div>
 
-      <div id="panel-gallery" class="tab-panel" role="tabpanel" aria-labelledby="tab-gallery" hidden>
-        <h2>Station Vinga A</h2>
-        <p class="note tab-intro">Kuststation i Göteborgs skärgård – temperaturdata från SMHI sedan 1996.</p>
-        <div class="bento-gallery">
-          <figure class="bento-item bento-item--large">
-            <img src="/static/images/hero-lighthouse.png" alt="Fyr vid kusten – Vinga" loading="lazy" />
-            <figcaption>Kuststation Vinga A</figcaption>
-          </figure>
-          <figure class="bento-item">
-            <img src="/static/images/storm.png" alt="Storm över berg" loading="lazy" />
-            <figcaption>Extremväder</figcaption>
-          </figure>
-          <figure class="bento-item">
-            <img src="/static/images/clouds.png" alt="Dramatiska moln" loading="lazy" />
-            <figcaption>Atmosfär & prognos</figcaption>
-          </figure>
-        </div>
+      <div id="panel-gallery" class="tab-panel station-panel" role="tabpanel" aria-labelledby="tab-gallery" hidden>
+        <article class="data-card station-data-card">
+          <header class="data-card__header data-card__header--stack">
+            <span id="gallery-station-badge" class="data-card__pill data-card__pill--ml">SMHI · Vinga A</span>
+            <h2 id="gallery-station-title" class="data-card__title">Station Vinga A</h2>
+            <p id="gallery-station-intro" class="data-card__subtitle">
+              Kuststation i Göteborgs skärgård – temperaturdata från SMHI sedan 1996.
+            </p>
+          </header>
+
+          <div class="station-data-card__map-wrap">
+            <p class="station-data-card__map-hint">Klicka markör eller välj station ovanför</p>
+            <div id="station-map" role="application" aria-label="Karta över väderstationer"></div>
+          </div>
+
+          <dl id="station-data-stats" class="station-data-card__stats" aria-label="Stationens data"></dl>
+        </article>
       </div>
     </section>
   </main>
@@ -316,14 +282,22 @@
   <footer>
     <p>Väderdata © SMHI. <code>/predict</code> från gruppens API.</p>
     <p class="credits">
-      Bilder: Unsplash – Pontus Wellgraff, NOAA, Tom Barrett ·
-      Widget-design:
+      Bilder: Unsplash – Fredrik Solli Wandem, Illia Stebelski, Pontus Wellgraff, NOAA, Tom Barrett ·
+      Karta: <a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a> · OpenStreetMap ·
+      Station-kort:
+      <a href="https://codepen.io/z-/pen/OBPJKK" target="_blank" rel="noopener">CodePen / z- (expanding flex cards)</a>
+      · Widget-design:
       <a href="https://codepen.io/Hereng-Issa/pen/OPbWdYz" target="_blank" rel="noopener">CodePen / weather-widgets</a>
       · Profilkort:
       <a href="https://uiverse.io/andrew-demchenk0" target="_blank" rel="noopener">Uiverse / andrew-demchenk0</a>
     </p>
   </footer>
 
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
   <script src="/static/app.js"></script>
 </body>
 </html>

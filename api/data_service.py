@@ -7,6 +7,13 @@ import pandas as pd
 from scipy import stats
 
 ROOT = Path(__file__).resolve().parent.parent
+ML_MODEL_FILE = ROOT / "models" / "temperature_models.pkl"
+ML_STATION_IDS = frozenset({"vinga", "stockholm", "malmo"})
+
+
+def station_has_ml(station_id: str | None = None) -> bool:
+    key, _ = resolve_station(station_id)
+    return key in ML_STATION_IDS and ML_MODEL_FILE.exists()
 
 STATIONS = {
     "vinga": {
@@ -34,7 +41,7 @@ def list_stations() -> list[dict]:
         {
             "id": key,
             "name": meta["name"],
-            "has_ml_model": key == "vinga",
+            "has_ml_model": station_has_ml(key),
         }
         for key, meta in STATIONS.items()
     ]
@@ -84,10 +91,10 @@ def compute_trend(station_id: str | None = None) -> dict:
     temps = annual["temp_mean"].values
     slope, intercept, r, p, _ = stats.linregress(years, temps)
     note = "Linjär trend på årsmedel."
-    if key == "vinga":
-        note += " ML-prognos tillgänglig för Vinga A."
+    if station_has_ml(key):
+        note += " ML-prognos tillgänglig för denna station."
     else:
-        note += " Prognos baserad på säsongsmedel (ingen ML-modell för denna station)."
+        note += " Prognos baserad på säsongsmedel (ML ej tillgänglig)."
     return {
         "station": meta["name"],
         "station_id": key,
