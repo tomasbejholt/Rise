@@ -26,6 +26,7 @@ Parametern är **lufttemperatur** (daglig minimum och maximum), hämtad från [S
 Rise/
 ├── prepare_data.py              # Läser SMHI-filer, rensar och slår ihop data
 ├── data_clean.csv               # Rensat dataset (genereras av skriptet)
+├── main.py                      # FastAPI-app, exponerar /predict och /health
 ├── smhi-opendata_19_71380_*.csv # Rådata från SMHI
 └── README.md
 ```
@@ -34,11 +35,13 @@ Rise/
 
 - Python 3.10+
 - [pandas](https://pandas.pydata.org/)
+- [fastapi](https://fastapi.tiangolo.com/)
+- [uvicorn](https://www.uvicorn.org/)
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install pandas
+pip install pandas fastapi uvicorn
 ```
 
 ## Användning
@@ -81,6 +84,34 @@ Saknade värden: 0
 2. Plockar ut datum, min- och maxtemperatur
 3. Slår ihop filerna, tar bort dubbletter och sorterar på datum
 4. Beräknar `temp_mean` och sparar till `data_clean.csv`
+
+## API
+
+Starta servern:
+
+```bash
+uvicorn main:app --reload
+```
+
+Endpoints:
+
+| Endpoint | Beskrivning |
+|----------|-------------|
+| `GET /health` | Kontrollerar att servern är igång |
+| `GET /predict?date=YYYY-MM-DD` | Returnerar temperaturprognos för givet datum |
+
+Exempel:
+
+```
+GET /predict?date=2028-06-14
+
+{
+  "date": "2028-06-14",
+  "predicted_temp": 17.3,
+  "lower_bound": 15.1,
+  "upper_bound": 19.5
+}
+```
 
 ## Nästa steg (idé)
 
