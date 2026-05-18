@@ -1,10 +1,31 @@
 let chart;
 let latestTrends = null;
 let stationName = "Vinga A";
+let selectedStation = "vinga";
 let widgetPrimary = null;
 let widgetCompare = null;
 
 /* --- API & diagram --- */
+
+function stationQuery() {
+  return `station=${encodeURIComponent(selectedStation)}`;
+}
+
+function getSelectedStation() {
+  const el = document.getElementById("station-select");
+  return el?.value || "vinga";
+}
+
+function updateChartNote(gapNote) {
+  const noteEl = document.getElementById("chart-note");
+  if (!noteEl) return;
+  if (gapNote) {
+    noteEl.textContent = gapNote;
+    noteEl.hidden = false;
+  } else {
+    noteEl.hidden = true;
+  }
+}
 
 async function fetchJson(path) {
   const res = await fetch(path);
@@ -15,10 +36,11 @@ async function fetchJson(path) {
   return res.json();
 }
 
-function buildChart(records) {
+function buildChart(records, label) {
   const ctx = document.getElementById("chart");
   const years = records.map((d) => d.year);
   const temps = records.map((d) => d.temp_mean);
+  const chartLabel = label ? `Årsmedel °C – ${label}` : "Årsmedel °C";
 
   if (chart) chart.destroy();
 
@@ -28,7 +50,7 @@ function buildChart(records) {
       labels: years,
       datasets: [
         {
-          label: "Årsmedel °C",
+          label: chartLabel,
           data: temps,
           borderColor: "hsl(223, 90%, 55%)",
           backgroundColor: "hsla(223, 90%, 55%, 0.2)",
@@ -56,15 +78,17 @@ function buildChart(records) {
 }
 
 async function loadHistoricalAndTrend() {
+  const q = stationQuery();
   const [historical, trends] = await Promise.all([
-    fetchJson("/api/historical"),
-    fetchJson("/api/trends"),
+    fetchJson(`/api/historical?${q}`),
+    fetchJson(`/api/trends?${q}`),
   ]);
 
   stationName = historical.station;
   latestTrends = trends;
   document.getElementById("station").textContent = stationName;
-  buildChart(historical.data);
+  updateChartNote(historical.gap_note);
+  buildChart(historical.data, stationName);
 }
 
 /* --- Expanderbar väderwidget (weather-widgets / CodePen) --- */
@@ -274,9 +298,10 @@ async function onPredictSubmit(event) {
   const errEl = document.getElementById("predict-error");
 
   try {
+    const q = stationQuery();
     const [primary, compare] = await Promise.all([
-      fetchJson(`/predict?date=${date}`),
-      fetchJson(`/predict?date=${compareDate}`),
+      fetchJson(`/predict?date=${date}&${q}`),
+      fetchJson(`/predict?date=${compareDate}&${q}`),
     ]);
     updateWidgets(primary, compare);
     errEl.hidden = true;
@@ -342,14 +367,52 @@ function initTabs() {
   });
 }
 
+async function loadStationsFromApi() {
+  try {
+    const { stations } = await fetchJson("/api/stations");
+    const select = document.getElementById("station-select");
+    if (!select || !stations?.length) return;
+
+    select.innerHTML = stations
+      .map(
+        (s) =>
+          `<option value="${s.id}">${s.name}${s.has_ml_model ? " (ML)" : ""}</option>`
+      )
+      .join("");
+    select.value = selectedStation;
+  } catch {
+    /* behåll statiska alternativ */
+  }
+}
+
+async function onStationChange() {
+  selectedStation = getSelectedStation();
+  const errEl = document.getElementById("predict-error");
+  errEl.hidden = true;
+
+  try {
+    await loadHistoricalAndTrend();
+    document.getElementById("predict-form").requestSubmit();
+    if (chart) chart.resize();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.hidden = false;
+  }
+}
+
 async function init() {
   initWeatherWidgets();
   initHeroMoods();
   initTabs();
 
+  selectedStation = getSelectedStation();
+  await loadStationsFromApi();
+  selectedStation = getSelectedStation();
+
   const dateInput = document.getElementById("date-input");
   dateInput.addEventListener("change", syncCompareDateFromPrimary);
 
+  document.getElementById("station-select").addEventListener("change", onStationChange);
   document.getElementById("predict-form").addEventListener("submit", onPredictSubmit);
   dateInput.value = new Date().toISOString().slice(0, 10);
   syncCompareDateFromPrimary();

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Rise – Väderanalys Vinga A</title>
+  <title>Rise – Väderanalys</title>
   <link rel="stylesheet" href="/static/style.css" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
@@ -102,6 +102,14 @@
   <main>
     <section class="weather-widgets-stage glass-panel" aria-label="Prognos och jämförelse">
       <form id="predict-form" class="weather-widgets-stage__toolbar">
+        <div>
+          <label for="station-select">Station</label>
+          <select id="station-select" required>
+            <option value="vinga">Vinga A</option>
+            <option value="stockholm">Stockholm</option>
+            <option value="malmo">Malmö</option>
+          </select>
+        </div>
         <div>
           <label for="date-input">Prognosdatum</label>
           <input type="date" id="date-input" required />
@@ -281,7 +289,7 @@
       <div id="panel-historik" class="tab-panel is-active" role="tabpanel" aria-labelledby="tab-historik">
         <h2>Historik (årsmedel)</h2>
         <canvas id="chart" height="140"></canvas>
-        <p class="note">Data med glapp 1998–2007 p.g.a. stationens driftstopp.</p>
+        <p id="chart-note" class="note">Data med glapp 1998–2007 p.g.a. stationens driftstopp.</p>
       </div>
 
       <div id="panel-gallery" class="tab-panel" role="tabpanel" aria-labelledby="tab-gallery" hidden>

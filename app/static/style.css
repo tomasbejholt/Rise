@@ -555,12 +555,18 @@ footer code {
   margin-bottom: 0.35rem;
 }
 
-.weather-widgets-stage__toolbar input[type="date"] {
+.weather-widgets-stage__toolbar input[type="date"],
+.weather-widgets-stage__toolbar select {
   padding: 0.55rem 0.75rem;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.25);
   background: rgba(11, 18, 32, 0.45);
   color: #fff;
+  min-width: 9rem;
+}
+
+.weather-widgets-stage__toolbar select {
+  cursor: pointer;
 }
 
 .weather-widgets-stage__toolbar button {

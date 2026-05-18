@@ -8,8 +8,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY main.py .
 COPY api/ api/
 COPY model/ model/
+COPY models/ models/
 COPY app/static/ app/static/
-COPY data/data_clean.csv .
+COPY data/ data/
 
 EXPOSE 7860
 
