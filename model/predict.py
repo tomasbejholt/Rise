@@ -5,8 +5,8 @@ from pathlib import Path
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
-DATA_FILE = ROOT / "data_clean.csv"
-MODEL_FILE = Path(__file__).resolve().parent / "model.pkl"
+DATA_FILE = ROOT / "data" / "data_clean.csv"
+MODEL_FILE = ROOT / "models" / "temperature_models.pkl"
 
 
 def _load_daily() -> pd.DataFrame:
