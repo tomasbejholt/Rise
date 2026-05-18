@@ -310,7 +310,7 @@ function initStationMap() {
   const el = document.getElementById("station-map");
   if (!el) return;
 
-  stationMap = L.map(el, { scrollWheelZoom: false });
+  stationMap = L.map(el, { scrollWheelZoom: true });
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     maxZoom: 18,
     attribution:
