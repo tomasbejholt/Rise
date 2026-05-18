@@ -1,0 +1,8 @@
+.venv/
+venv/
+__pycache__/
+.git/
+.mplconfig/
+*.pyc
+smhi-opendata_*.csv
+data/
