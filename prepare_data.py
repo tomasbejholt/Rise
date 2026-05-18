@@ -29,13 +29,13 @@ def load_and_clean(filepaths):
 
 def main():
     files = [
-        "smhi-opendata_19_71380_199604_200603.csv",
-        "smhi-opendata_19_71380_200603_201602.csv",
-        "smhi-opendata_19_71380_201602_202601.csv",
+        "data/smhi-opendata_19_71380_199604_200603.csv",
+        "data/smhi-opendata_19_71380_200603_201602.csv",
+        "data/smhi-opendata_19_71380_201602_202601.csv",
     ]
 
     df = load_and_clean(files)
-    df.to_csv("data_clean.csv", index=False)
+    df.to_csv("data/data_clean.csv", index=False)
 
     print("Antal rader:", len(df))
     print("Datumspann:", df["date"].min(), "→", df["date"].max())

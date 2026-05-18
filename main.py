@@ -14,7 +14,7 @@ STATIC_DIR = ROOT / "app" / "static"
 
 app = FastAPI(
     title="Rise – Väderprognos",
-    description="SMHI Vinga A. Gruppens /predict + historikdiagram i webben.",
+    description="SMHI-data för Vinga A, Stockholm och Malmö.",
 )
 
 if STATIC_DIR.is_dir():
@@ -26,6 +26,16 @@ class TemperatureResponse(BaseModel):
     predicted_temp: float
     lower_bound: float
     upper_bound: float
+    station_id: str | None = None
+    model: str | None = None
+
+
+def _resolve_station_id(station: str | None) -> str:
+    try:
+        key, _ = data_service.resolve_station(station)
+        return key
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e)) from e
 
 
 @app.get("/")
@@ -38,11 +48,23 @@ def index():
 
 @app.get("/health")
 def health():
-    return {"status": "ok", "station": data_service.STATION}
+    return {
+        "status": "ok",
+        "stations": data_service.list_stations(),
+        "default_station": data_service.DEFAULT_STATION,
+    }
+
+
+@app.get("/api/stations")
+def stations():
+    return {"stations": data_service.list_stations()}
 
 
 @app.get("/predict", response_model=TemperatureResponse)
-def predict(date: str = Query(..., description="YYYY-MM-DD")):
+def predict(
+    date: str = Query(..., description="YYYY-MM-DD"),
+    station: str | None = Query(None, description="vinga | stockholm | malmo"),
+):
     try:
         datetime.strptime(date, "%Y-%m-%d")
     except ValueError:
@@ -50,19 +72,35 @@ def predict(date: str = Query(..., description="YYYY-MM-DD")):
             status_code=422, detail="Invalid date format. Use YYYY-MM-DD."
         )
 
-    result = predict_temperature(date)
+    station_id = _resolve_station_id(station)
+    try:
+        result = predict_temperature(date, station_id)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+
     return TemperatureResponse(**result)
 
 
 @app.get("/api/historical")
-def historical():
-    annual = data_service.annual_means()
+def historical(station: str | None = Query(None)):
+    station_id = _resolve_station_id(station)
+    try:
+        annual = data_service.annual_means(station_id)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+
     return {
-        "station": data_service.STATION,
+        "station": data_service.station_name(station_id),
+        "station_id": station_id,
         "data": annual.to_dict(orient="records"),
+        "gap_note": data_service.station_gap_note(station_id),
     }
 
 
 @app.get("/api/trends")
-def trends():
-    return data_service.compute_trend()
+def trends(station: str | None = Query(None)):
+    station_id = _resolve_station_id(station)
+    try:
+        return data_service.compute_trend(station_id)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
